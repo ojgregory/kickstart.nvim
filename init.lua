@@ -154,6 +154,8 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+vim.cmd 'filetype plugin on'
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -256,6 +258,8 @@ require('lazy').setup({
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      signcolumn = true,
+      current_line_blame = true,
     },
   },
 
@@ -567,14 +571,6 @@ require('lazy').setup({
             },
           },
         },
-        markdown_oxide = {},
-      }
-
-      local lspconfig = require 'lspconfig'
-
-      require('lspconfig').markdown_oxide.setup {
-        capabilities = capabilities,
-        root_dir = lspconfig.util.root_pattern('.git', vim.fn.getcwd()),
       }
 
       -- Ensure the servers and tools above are installed
@@ -603,6 +599,33 @@ require('lazy').setup({
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
+        },
+      }
+    end,
+  },
+  {
+    'zk-org/zk-nvim',
+    config = function()
+      require('zk').setup {
+        -- See Setup section below
+        -- can be "telescope", "fzf", "fzf_lua" or "select" (`vim.ui.select`)
+        -- it's recommended to use "telescope", "fzf" or "fzf_lua"
+        picker = 'telescope',
+
+        lsp = {
+          -- `config` is passed to `vim.lsp.start_client(config)`
+          config = {
+            cmd = { 'zk', 'lsp' },
+            name = 'zk',
+            -- on_attach = ...
+            -- etc, see `:h vim.lsp.start_client()`
+          },
+
+          -- automatically attach buffers in a zk notebook that match the given filetypes
+          auto_attach = {
+            enabled = true,
+            filetypes = { 'markdown' },
+          },
         },
       }
     end,
@@ -742,11 +765,7 @@ require('lazy').setup({
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
         },
         sources = {
-          { name = 'nvim_lsp', option = {
-            markdown_oxide = {
-              keyword_pattern = [[\(\k\| \|\/\|#\)\+]],
-            },
-          } },
+          { name = 'nvim_lsp', option = {} },
           { name = 'luasnip' },
           { name = 'path' },
         },
